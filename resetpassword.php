@@ -34,8 +34,9 @@ $conn->close();
 <!DOCTYPE html>
 <html>
 <head>
-  <title>5.X - Kosning</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/main.css" media="screen"/>
+  <?php
+  include("include/meta.php");
+  ?>
 </head>
 <body>
   <div class="login">

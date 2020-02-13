@@ -4,8 +4,27 @@ require_once ("db.php");
 
 $CONFIG = array(
     'name' => '5.X',
+    'is_open' => true,
     'date_of_vote' => mktime(12, 0, 0, 2, 15, 2020)
 );
+
+abstract class state
+{
+    const CLOSED = 0;
+    const IDEAS = 1;
+    const VOTING = 2;
+}
+
+function getState() {
+  global $CONFIG;
+  if($CONFIG["is_open"]) {
+    if(time() - $CONFIG["date_of_vote"] > 0) {
+      return state::VOTING;
+    }
+    return state::IDEAS;
+  }
+  return state::CLOSED;
+}
 
 function requireChangePassword() {
   if(isset($_SESSION["change_password"])) {
@@ -38,12 +57,12 @@ function isLoggedIn() {
   }
 }
 
-function requireLogin() {
+function requireLogin($redirect = true) {
   if(!isLoggedIn()) {
     header("Location: /login.php");
     die();
   }
-  if(requireChangePassword()) {
+  if($redirect === true && requireChangePassword()) {
     header("Location: /resetpassword.php");
     die();
   }
@@ -61,6 +80,7 @@ function resetpassword($id, $old_password, $new_password, $conn) {
       $hashed = changePassword($new_password);
       $sql->bind_param('si', $hashed, $id);
       $sql->execute();
+      $_SESSION["change_password"] = false;
       return 0;
     } else {
       return 1;

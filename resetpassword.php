@@ -1,10 +1,6 @@
 <?php
 require_once("include/main.php");
-
-if(!isLoggedIn()) {
-  header("Location: /");
-  die();
-}
+requireLogin(false);
 
 $errors = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

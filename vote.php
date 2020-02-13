@@ -30,27 +30,27 @@ $users = getUsers($conn);
 <body>
   <?php
     if(!isset($_GET["id"]) || trim($_GET["id"]) === '') {
-      ?>
-      <div>
-        <h1>Uppástungur</h1>
-        <div class="list_of_voters">
-          <table>
-            <tr>
-              <th>Nafn</th>
-            </tr>
-            <?php
-            foreach($users as $user) {?>
+      if(getState() === state::IDEAS) {?>
+        <div>
+          <h1>Uppástungur</h1>
+          <div class="list_of_voters">
+            <table>
               <tr>
-                <th><a href="/vote.php?id=<?php echo $user["id"];?>"><?php echo $user["name"]; ?></th>
+                <th>Nafn</th>
               </tr>
-            <?php
-              }
-            ?>
-          </table>
-          <p style="color: white;">ATH: Þetta er aðeins uppástungur. Kosning verður tilkynnt bráðlega.</p>
+              <?php
+              foreach($users as $user) {?>
+                <tr>
+                  <th><a href="/vote.php?id=<?php echo $user["id"];?>"><?php echo $user["name"]; ?></th>
+                </tr>
+              <?php } ?>
+            </table>
+            <p style="color: white;">ATH: Þetta er aðeins uppástungur. Kosning verður tilkynnt bráðlega.</p>
+          </div>
         </div>
-      </div>
-      <?php
+      <?php } else {
+        die('hello');
+      }
     } else {
       if($_GET["id"] == $_SESSION["id"]) {
           header("Location: /");

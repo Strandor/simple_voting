@@ -20,14 +20,14 @@ function addIdea($id, $target, $idea, $conn) {
 }
 
 function getIdeas($id, $conn) {
-  $sql = $conn->prepare("SELECT idea FROM ideas WHERE target=?");
+  $sql = $conn->prepare("SELECT id, idea FROM ideas WHERE target=?");
   $sql->bind_param('i', $id);
   $sql->execute();
 
   $result = $sql->get_result();
   $ideas = array();
   while ($row = $result->fetch_assoc()) {
-    array_push($ideas, array("idea" => $row["idea"]));
+    array_push($ideas, array("idea" => $row["idea"], "id" => $row["id"]));
   }
   return $ideas;
 }
@@ -44,5 +44,17 @@ function getUsers($conn) {
     array_push($users, array("name" => $row["name"], "id" => $row["id"]));
   }
   return $users;
+}
+
+function checkIfVoted($id) {
+  
+}
+
+function addScore($id, $voting, $conn) {
+  foreach($voting as $key => $idea) {
+    $sql = $conn->prepare('INSERT INTO `votes`(`user`, `idea`, `score`) VALUES (?,?,?);');
+    $sql->bind_param('iii', $_SESSION["id"], $idea, $key);
+    $sql->execute();
+  }
 }
 ?>

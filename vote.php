@@ -1,23 +1,48 @@
 <?php
 require_once("include/main.php");
 requireLogin();
-
 require_once("include/vote.php");
 
+$state = getState();
 
-//TODO FIX
 $errors = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if((!isset($_POST["idea"]) || trim($_POST["idea"]) === '') || (!isset($_GET["id"]) || trim($_GET["id"]) === '')) {
-    array_push($errors, "No value given");
-  } else if(strlen($_POST["idea"]) > 50) {
-    array_push($errors, "String too long");
-  }
+  if($state === STATE::IDEAS) {
+    if((!isset($_POST["idea"]) || trim($_POST["idea"]) === '') || (!isset($_GET["id"]) || trim($_GET["id"]) === '')) {
+      array_push($errors, "No value given");
+    } else if(strlen($_POST["idea"]) > 50) {
+      array_push($errors, "String too long");
+    }
 
-  if(empty($errors)) {
-      if(!getUser($_GET["id"], $conn) == 0) {
-        addIdea($_SESSION["id"], $_GET["id"], $_POST["idea"], $conn);
+    if(empty($errors)) {
+        if(!getUser($_GET["id"], $conn) == 0) {
+          addIdea($_SESSION["id"], $_GET["id"], $_POST["idea"], $conn);
+        }
+    }
+  } else if(getState() === STATE::VOTING) {
+    $voting = array();
+    foreach($_POST as $key => $value) {
+      if(is_int($key)) {
+        if($value > 0 && $value < 4) {
+          if(array_key_exists($value, $voting)) {
+            array_push($errors, "Repeat of value");
+            break;
+          }
+          $voting[$value] = $key;
+        } else if($value != 0) {
+          array_push($errors, "Unknown value given");
+          break;
+        }
       }
+    }
+
+    if(empty($voting)) {
+      //TODO
+    }
+
+    if(empty($errors)) {
+      addScore($_GET["id"], $voting, $conn);
+    }
   }
 }
 
@@ -33,7 +58,7 @@ $users = getUsers($conn);
 <body>
   <?php
     if(!isset($_GET["id"]) || trim($_GET["id"]) === '') {
-      if(getState() === state::IDEAS) {?>
+      if($state === state::IDEAS) {?>
         <div>
           <h1>Uppástungur</h1>
           <div class="list_of_voters">
@@ -67,7 +92,7 @@ $users = getUsers($conn);
           die();
       }
 
-      if(getState() === state::IDEAS) {
+      if($state === state::IDEAS) {
         $user = getUser($_GET["id"], $conn);
 
         if($user === 0) {
@@ -122,46 +147,73 @@ $users = getUsers($conn);
             </form>
           </div>
         <?php
-        } else {
-          $user = getUser($_GET["id"], $conn);
+      } else if($state === state::VOTING) {
+        $user = getUser($_GET["id"], $conn);
 
-          if($user === 0) {
-            header("Location: /");
-          }
+        if($user === 0) {
+          header("Location: /");
+        }
 
-          $ideas = getIdeas($_GET["id"], $conn);
-          ?>
-          <div>
-            <a href="/vote.php" class="back">Til baka</a>
-            <h1 class="name"><?php echo $user["name"] ?></h1>
-            <div class="list-options">
-              <div class="list-child">
-                <input type="number" min="1"/>
-                <p>Cutiepie</p>
-                <img src="/assets/icons/menu-24px.svg"/>
-              </div>
-              <div class="list-child">
-                <input type="number" min="1"/>
-                <p>Cutiepie</p>
-                <img src="/assets/icons/menu-24px.svg"/>
-              </div>
-              <div class="list-child">
-                <input type="number" min="1"/>
-                <p>Cutiepie</p>
-                <img src="/assets/icons/menu-24px.svg"/>
-              </div>
+        $ideas = getIdeas($_GET["id"], $conn);
+        ?>
+        <div>
+          <a href="/vote.php" class="back">Til baka</a>
+          <h1 class="name"><?php echo $user["name"] ?></h1>
+          <div class="list_of_voters">
+            <form id="score-form" method="POST" action="/vote.php?id=<?php echo $_GET["id"] ?>">
+            <table>
+              <tr>
+                <th>Hugmyndir:</th>
+              </tr>
+              <?php
+              $exists = false;
+              $length = count($ideas);
+              foreach($ideas as $idea) {
+                $exists = true;
+                ?>
+                <tr>
+                  <th>
+                    <select class="score-option" name="<?php echo $idea["id"]; ?>">
+                      <option value="0"></option>
+                      <?php
+                      for($i = 1; $i <= $length && $i <= 3; $i++) {
+                        echo '<option value="' . $i . '">' . $i .'</option>';
+                      }
+                      ?>
+                    </select>
+                    <?php echo htmlspecialchars($idea["idea"], ENT_QUOTES, 'UTF-8'); ?>
+                  </th>
+                </tr>
+                <?php
+              }
+              if(!$exists) {
+                ?>
+                <tr>
+                  <th>Engar hugmyndir enn :(</th>
+                </tr>
+                <?php
+              }
+              ?>
+            </table>
+          </form>
+          </div>
+          <?php
+          foreach($errors as $message) {
+            ?>
+            <div class="error-box">
+              <img src="/assets/icons/error-24px.svg"/>
+              <p><?php echo $message ?></p>
             </div>
             <?php
-            foreach($errors as $message) {
-              ?>
-              <div class="error-box">
-                <img src="/assets/icons/error-24px.svg"/>
-                <p><?php echo $message ?></p>
-              </div>
-              <?php
-            }
-        }
+          }
+          ?>
+          <div class="idea">
+            <p>Senda inn atkvæði</p>
+            <button form="score-form" type="submit" name="submit" placeholder="Senda inn">Submit</button>
+          </div>
+          <?php
       }
+    }
 ?>
 <script src="/js/main.js"></script>
 </body>

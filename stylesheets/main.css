@@ -105,7 +105,7 @@ td, th {
   padding-left: 5px;
 }
 
-.login, .start_vote {
+.login, .start_vote, .finished {
   text-align: center;
   margin: auto;
   width: 50%;
@@ -113,8 +113,13 @@ td, th {
   padding-top: 150px;
 }
 
+.finished p {
+  color: white;
+  text-align: center;
+}
+
 @media only screen and (max-width: 800px) {
-  .login {
+  .login, .finished {
     width: 90%;
   }
   h1 {

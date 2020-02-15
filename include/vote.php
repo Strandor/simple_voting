@@ -32,6 +32,18 @@ function getIdeas($id, $conn) {
   return $ideas;
 }
 
+function getIdNotVoted($conn) {
+  $sql = $conn->prepare("SELECT id FROM `users` WHERE id != ? AND id NOT IN (SELECT target FROM votes WHERE user = ?)");
+  $sql->bind_param('ii', $_SESSION["id"], $_SESSION["id"]);
+  $sql->execute();
+
+
+  $result = $sql->get_result();
+  while ($row = $result->fetch_assoc()) {
+    return $row["id"];
+  }
+  return null;
+}
 
 function getUsers($conn) {
   $sql = $conn->prepare("SELECT id, name FROM users WHERE id!=?");
@@ -46,14 +58,28 @@ function getUsers($conn) {
   return $users;
 }
 
-function checkIfVoted($id) {
-  
+function checkIfVoted($id, $conn) {
+  $sql = $conn->prepare("SELECT id FROM votes WHERE target=? AND user=?;");
+  $sql->bind_param('ii', $id, $_SESSION["id"]);
+  $sql->execute();
+
+  $result = $sql->get_result();
+  if ($result->fetch_assoc() > 0) {
+    return true;
+  }
+  return false;
+}
+
+// TODO FIX
+function ideaExist($id, $voting) {
+  return true;
 }
 
 function addScore($id, $voting, $conn) {
   foreach($voting as $key => $idea) {
-    $sql = $conn->prepare('INSERT INTO `votes`(`user`, `idea`, `score`) VALUES (?,?,?);');
-    $sql->bind_param('iii', $_SESSION["id"], $idea, $key);
+    $sql = $conn->prepare('INSERT INTO `votes`(`target`, `user`, `idea`, `score`) VALUES (?, ?,?,?);');
+    $score = 4 - $key;
+    $sql->bind_param('iiii', $id, $_SESSION["id"], $idea, $score);
     $sql->execute();
   }
 }

@@ -37,11 +37,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if(empty($voting)) {
-      //TODO
+      array_push($errors, "No vote given.");
     }
 
     if(empty($errors)) {
-      addScore($_GET["id"], $voting, $conn);
+      if(ideaExist($_GET["id"], $voting)) {
+        addScore($_GET["id"], $voting, $conn);
+        header("Location: /redirectvote.php");
+        exit;
+      } else {
+        array_push($errors, "Idea id given does not exists");
+      }
     }
   }
 }
@@ -92,13 +98,13 @@ $users = getUsers($conn);
           die();
       }
 
+      $user = getUser($_GET["id"], $conn);
+      if($user === 0) {
+        die('hello');
+        header("Location: /");
+      }
+
       if($state === state::IDEAS) {
-        $user = getUser($_GET["id"], $conn);
-
-        if($user === 0) {
-          header("Location: /");
-        }
-
         $ideas = getIdeas($_GET["id"], $conn);
         ?>
         <div>
@@ -148,9 +154,7 @@ $users = getUsers($conn);
           </div>
         <?php
       } else if($state === state::VOTING) {
-        $user = getUser($_GET["id"], $conn);
-
-        if($user === 0) {
+        if(checkIfVoted($_GET["id"], $conn)) {
           header("Location: /");
         }
 

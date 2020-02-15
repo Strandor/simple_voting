@@ -1,6 +1,13 @@
 <?php
 require_once("include/main.php");
 requireLogin();
-header("Location: /vote.php?id=2");
+require_once("include/vote.php");
+$id = getIdNotVoted($conn);
+if($id !== null) {
+  header("Location: /vote.php?id=" . $id);
+} else {
+  $_SESSION["finished_voting"] = true;
+  header("Location: /finished.php");
+}
 exit;
 ?>

@@ -1,6 +1,7 @@
 <?php
 require_once("include/main.php");
 requireLogin();
+requireOpen();
 require_once("include/vote.php");
 
 $state = getState();
@@ -214,6 +215,7 @@ $users = getUsers($conn);
           <div class="idea">
             <p>Senda inn atkvæði</p>
             <button form="score-form" type="submit" name="submit" placeholder="Senda inn">Submit</button>
+            <p>ATH: Veldu nr. 1 sem þér finnst best.</p>
           </div>
           <?php
       }

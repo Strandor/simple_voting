@@ -1,5 +1,6 @@
 <?php
 require_once("include/main.php");
+requireOpen();
 requireLogin(false);
 
 $errors = array();

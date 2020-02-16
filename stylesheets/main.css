@@ -86,6 +86,10 @@ td, th {
   font-size: 22px;
 }
 
+.idea p:last-child {
+  font-size: 12px;
+}
+
 .error-box {
   width: 70%;
   background-color: white;

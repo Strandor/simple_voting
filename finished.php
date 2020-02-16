@@ -1,5 +1,6 @@
 <?php
 require_once("include/main.php");
+requireOpen();
 requireLogin();
 if(!isset($_SESSION["finished_voting"]) || $_SESSION["finished_voting"] == false) {
   header("Location: /vote.php");

@@ -5,7 +5,7 @@ require_once ("db.php");
 $CONFIG = array(
     'name' => '5.X',
     'is_open' => true,
-    'date_of_vote' => mktime(12, 0, 0, 2, 15, 2010)
+    'date_of_vote' => mktime(12, 0, 0, 2, 17, 2020)
 );
 
 abstract class state
@@ -54,6 +54,13 @@ function isLoggedIn() {
     return true;
   } else {
     return false;
+  }
+}
+
+function requireOpen() {
+  if(getState() === state::CLOSED) {
+    header("Location: /closed.php");
+    die();
   }
 }
 
